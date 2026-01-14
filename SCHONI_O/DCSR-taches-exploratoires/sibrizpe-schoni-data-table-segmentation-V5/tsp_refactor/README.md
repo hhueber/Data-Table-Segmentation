@@ -22,12 +22,17 @@ Extrait les pages des PDF en images, segmente et extrait les tableaux englobants
 
 Instructions d'installation et d'utilisation de l'outil Table Processor.
 
-1. Installez les dépendances via pip :
+1. Créez un environnement virtuel, et activez-le :
+   ```bash
+   python -m venv env ; source env/bin/activate
+   ```
+
+2. Installez les dépendances via pip :
    ```bash
    pip install -r requirements.txt
    ```
 
-2. Exécutez le script principal avec les arguments nécessaires :
+3. Exécutez le script principal avec les arguments nécessaires :
    ```bash
     python table_extractor.py <chemin_vers_le_fichier> <chemin_de_sortie>
     ```

@@ -4,7 +4,8 @@
 
 Extrait les pages des PDF en images, segmente et extrait les tableaux englobants, avec raffinement des bordures.
 
-## 🎯 Fonctionnalitées
+## 🎯 Fonctionnalités
+
 - Sources possibles : un pdf, plusieurs pdfs dans un dossier cible, une image, plusieurs images dans un dossier cible
 - Extraction des pages en images depuis des documents PDF
 - Segmentation et extraction d'un tableau englobant depuis les images
@@ -12,11 +13,12 @@ Extrait les pages des PDF en images, segmente et extrait les tableaux englobants
 - Production d'un log des opérations effectuées dans le dossier de sortie
 
 ## 📦 Dépendances
-- **Python** : 3.13.1
-- **OpenCV** : 4.11
-- **Pillow** : 11.2.1
-- **PyMuPDF** : 1.26.0
-- **NumPy** : 2.2.6
+
+- **Python** : 3.12
+- **NumPy** : 2.0
+- **OpenCV** : 4.12
+- **Pillow** : 11.3
+- **PyMuPDF** : 1.26
 
 ## 🚀 Utilisation
 
@@ -62,4 +64,4 @@ Options disponibles :
 
 ## 📄 Contact
 
-Pour toute question ou suggestion, veuillez contacter helpdesk@unil.ch
+Pour toute question ou suggestion, veuillez contacter [helpdesk@unil.ch](mailto:helpdesk@unil.ch?subject=%5BDCSR%5D%20Data%20Table%20Segmentation) en précisant "DCSR" dans l'objet du courriel.

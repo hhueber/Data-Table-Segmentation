@@ -471,7 +471,7 @@ class BorderRefiner(ImageProcessor):
 class ConsoleProgressObserver:
     """Console-based progress observer."""
     
-    def __init__(self, verbose: bool = True):
+    def __init__(self, verbose: int = 0):
         self._verbose = verbose
     
     def on_stage_started(self, stage: ProcessingStage, message: str) -> None:
@@ -828,7 +828,7 @@ class PathValidator:
 
 
 @contextmanager
-def processing_timer():
+def processing_timer(verbose: int = 0):
     """Context manager for timing processing operations."""
     import time
     start_time = time.time()
@@ -837,7 +837,8 @@ def processing_timer():
     finally:
         end_time = time.time()
         completion_msg = f"Processing completed in {end_time - start_time:.2f} seconds"
-        print(completion_msg)
+        if verbose:
+            print(completion_msg)
         logging.info(completion_msg)
 
 
@@ -852,7 +853,7 @@ class TableProcessor:
     def __init__(
         self, 
         config: Optional[ProcessingConfig] = None,
-        verbose: bool = True,
+        verbose: int = 0,
         observer: Optional[ProgressObserver] = None
     ):
         """
@@ -944,7 +945,7 @@ class TableProcessor:
                 extraction_method=extraction_method
             )
             
-            with processing_timer():
+            with processing_timer(verbose=self._observer.verbose):
                 result = self._pipeline.process(pdf_path, output_dir, options)
                 
                 # Logs de fin de traitement réussi
@@ -1044,7 +1045,7 @@ class TableProcessor:
                 extraction_method=extraction_method
             )
             
-            with processing_timer():
+            with processing_timer(verbose=self._observer.verbose):
                 result = self._pipeline.process(images_dir, output_dir, options)
                 
                 # Logs de fin de traitement réussi
@@ -1128,7 +1129,7 @@ def main():
             binarization_threshold=120
         )
         
-        processor = TableProcessor(config=config, verbose=True)
+        processor = TableProcessor(config=config, verbose=0)
         
         # Example: Process a PDF file
         results = processor.process_pdf(

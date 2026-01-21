@@ -13,7 +13,7 @@ Examples:
     python table_extractor.py ./pdfs ./output --extract-tables --refine-borders
     
     # Traiter un seul PDF
-    python table_extractor.py './path_to/document.pdf' './path_to_output_folder/' --all --method line_detection --verbose --export-json results.json
+    python table_extractor.py './path_to/document.pdf' './path_to_output_folder/' --all --method line_detection -vv --export-json results.json
     
     # Traiter des images existantes
     python table_extractor.py './images' './output' --extract-tables --method contour
@@ -44,10 +44,9 @@ except ImportError as e:
 class CLIProgressObserver(ConsoleProgressObserver):
     """Observer personnalisé pour l'interface en ligne de commande."""
     
-    def __init__(self, verbose: bool = True, quiet: bool = False):
-        super().__init__(verbose=verbose and not quiet)
+    def __init__(self, verbose: int = 0):
+        super().__init__(verbose=verbose)
         self.verbose = verbose
-        self.quiet = quiet
         self.stats = {
             'stages_completed': 0,
             'total_files': 0,
@@ -58,29 +57,33 @@ class CLIProgressObserver(ConsoleProgressObserver):
     
     def on_stage_started(self, stage, message):
         msg = f"🔄 {stage.value}: {message}"
-        if self.verbose:
+        if self.verbose > 1:
             print(msg)
-        logging.info(msg)
+        if self.verbose:
+            logging.info(msg)
     
     def on_stage_completed(self, stage, message):
         self.stats['stages_completed'] += 1
         msg = f"✅ {stage.value}: {message}"
-        if self.verbose:
+        if self.verbose > 1:
             print(msg)
-        logging.info(msg)
+        if self.verbose:
+            logging.info(msg)
     
     def on_progress_update(self, current, total, message):
         percentage = (current / total) * 100 if total > 0 else 0
         msg = f"📊 Progression: {current}/{total} ({percentage:.1f}%) - {message}"
-        if self.verbose:
+        if self.verbose > 1:
             print(msg)
-        logging.info(msg)
+        if self.verbose:
+            logging.info(msg)
     
     def on_error(self, stage, error):
         msg = f"❌ ERREUR dans {stage.value}: {error}"
-        if self.verbose:
+        if self.verbose > 1:
             print(msg)
-        logging.error(msg)
+        if self.verbose:
+            logging.error(msg)
     
     def increment_file_stats(self, success: bool):
         self.stats['total_files'] += 1
@@ -145,8 +148,10 @@ Exemples d'utilisation:
         
         # Option verbose uniquement
         parser.add_argument(
+            '-v',
             '--verbose',
-            action='store_true',
+            action='count',
+            default=0,
             help='Affichage détaillé du processus'
         )
         
@@ -314,7 +319,7 @@ Exemples d'utilisation:
         
         # Configuration et initialisation
         config = self._create_config()
-        self.observer = CLIProgressObserver(verbose=args.verbose, quiet=False)
+        self.observer = CLIProgressObserver(verbose=args.verbose)
         
         # Créer le processeur avec observer personnalisé et verbose correct
         from extractor_module import TableSegmentationPipeline
@@ -322,10 +327,11 @@ Exemples d'utilisation:
         self.processor = TableProcessor(config=config, verbose=args.verbose)
         self.processor._pipeline = pipeline  # Remplacer le pipeline par défaut
         
-        print(f"🚀 Démarrage du traitement")
-        print(f"📁 Entrée: {input_path}")
-        print(f"📁 Sortie: {output_path}")
-        print(f"📄 Log: {log_path}")
+        if args.verbose:
+            print(f"🚀 Démarrage du traitement")
+            print(f"📁 Entrée: {input_path}")
+            print(f"📁 Sortie: {output_path}")
+            print(f"📄 Log: {log_path}")
         
         # Logger les informations principales
         logging.info(f"Démarrage du traitement")
@@ -341,7 +347,8 @@ Exemples d'utilisation:
                 print("⚠️ Aucun fichier à traiter trouvé")
                 return 1
             
-            print(f"📋 {len(items_to_process)} élément(s) à traiter")
+            if args.verbose:
+                print(f"📋 {len(items_to_process)} élément(s) à traiter")
             logging.info(f"{len(items_to_process)} élément(s) à traiter")
             
             # Traiter tous les éléments
@@ -349,7 +356,8 @@ Exemples d'utilisation:
             
             for i, item in enumerate(items_to_process, 1):
                 msg = f"Traitement {i}/{len(items_to_process)}: {item.name}"
-                print(f"\n📄 {msg}")
+                if args.verbose:
+                    print(f"\n📄 {msg}")
                 logging.info(msg)
                 
                 try:
@@ -360,7 +368,8 @@ Exemples d'utilisation:
                     success_rate = summary.get('success_rate', 0)
                     total_files = summary.get('total_processed_files', 0)
                     success_msg = f"Terminé: {total_files} fichier(s), {success_rate:.1f}% de réussite"
-                    print(f"  ✅ {success_msg}")
+                    if args.verbose:
+                        print(f"  ✅ {success_msg}")
                     logging.info(success_msg)
                 
                 except Exception as e:
@@ -377,15 +386,16 @@ Exemples d'utilisation:
             # Rapport final
             final_report = self.observer.get_final_report()
             
-            print(f"\n{'='*50}")
-            print(f"📊 RAPPORT FINAL")
-            print(f"{'='*50}")
-            print(f"⏱️  Temps total: {final_report['total_time']}")
-            print(f"📁 Éléments traités: {final_report['files_processed']}")
-            print(f"✅ Succès: {final_report['successful_files']}")
-            print(f"❌ Échecs: {final_report['failed_files']}")
-            print(f"📈 Taux de réussite: {final_report['success_rate']:.1f}%")
-            print(f"📄 Log sauvegardé: {log_path}")
+            if args.verbose:
+                print(f"\n{'='*50}")
+                print(f"📊 RAPPORT FINAL")
+                print(f"{'='*50}")
+                print(f"⏱️  Temps total: {final_report['total_time']}")
+                print(f"📁 Éléments traités: {final_report['files_processed']}")
+                print(f"✅ Succès: {final_report['successful_files']}")
+                print(f"❌ Échecs: {final_report['failed_files']}")
+                print(f"📈 Taux de réussite: {final_report['success_rate']:.1f}%")
+                print(f"📄 Log sauvegardé: {log_path}")
             
             # Logger le rapport final
             logging.info("RAPPORT FINAL")

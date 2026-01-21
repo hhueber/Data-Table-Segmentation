@@ -632,7 +632,7 @@ class TableSegmentationPipeline:
         
         self._observer.on_stage_completed(
             ProcessingStage.IMAGE_EXTRACTION,
-            f"Extracted {len(self._results.get("extracted_images", []))} images"
+            f"Extracted {len(self._results.get('extracted_images', []))} images"
         )
     
     def _copy_existing_images(self) -> None:

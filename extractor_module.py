@@ -113,7 +113,7 @@ class ImageMetadata:
     width: int
     height: int
     format: str
-    processing_timestamp: float = field(default_factory=lambda: __import__('time').time())
+    processing_timestamp: float = field(default_factory=lambda: __import__("time").time())
 
 
 @dataclass(frozen=True)
@@ -582,12 +582,12 @@ class TableSegmentationPipeline:
         
         # Initialize results
         self._results = {
-            'input_path': str(input_path),
-            'output_base_dir': str(output_base_dir),
-            'options': options,
-            'processed_files': [],
-            'errors': [],
-            'processing_time': 0.0
+            "input_path": str(input_path),
+            "output_base_dir": str(output_base_dir),
+            "options": options,
+            "processed_files": [],
+            "errors": [],
+            "processing_time": 0.0
         }
         
         self._observer.on_stage_completed(
@@ -598,9 +598,9 @@ class TableSegmentationPipeline:
     def _setup_output_directories(self) -> None:
         """Create necessary output directories."""
         directories = {
-            'images': self._output_base_dir / SUFFIX_EXTRACTED_IMAGES_FOLDER,
-            'tables': self._output_base_dir / SUFFIX_EXTRACTED_TABLES_FOLDER, 
-            'refined': self._output_base_dir / SUFFIX_EXTRACTED_REFINED_TABLE_BORDERS_FOLDER
+            "images": self._output_base_dir / SUFFIX_EXTRACTED_IMAGES_FOLDER,
+            "tables": self._output_base_dir / SUFFIX_EXTRACTED_TABLES_FOLDER,
+            "refined": self._output_base_dir / SUFFIX_EXTRACTED_REFINED_TABLE_BORDERS_FOLDER
         }
         
         for dir_type, dir_path in directories.items():
@@ -616,7 +616,7 @@ class TableSegmentationPipeline:
         
         extractor = ImageExtractor()
         
-        if self._input_path.is_file() and self._input_path.suffix.lower() == '.pdf':
+        if self._input_path.is_file() and self._input_path.suffix.lower() == ".pdf":
             # Process single PDF
             self._observer.on_progress_update(
                 1, 1,
@@ -625,14 +625,14 @@ class TableSegmentationPipeline:
             
             # Passer l'observer au processeur pour logger chaque page
             images_metadata = extractor.process(self._input_path, self._images_dir, self._config, self._observer)
-            self._results['extracted_images'] = [str(meta.output_path) for meta in images_metadata]
+            self._results["extracted_images"] = [str(meta.output_path) for meta in images_metadata]
         else:
             # Handle directory of images (copy them to images directory)
             self._copy_existing_images()
         
         self._observer.on_stage_completed(
             ProcessingStage.IMAGE_EXTRACTION,
-            f"Extracted {len(self._results.get('extracted_images', []))} images"
+            f"Extracted {len(self._results.get("extracted_images", []))} images"
         )
     
     def _copy_existing_images(self) -> None:
@@ -665,7 +665,7 @@ class TableSegmentationPipeline:
                     f"✅ Copied successfully: {file_path.name}"
                 )
         
-        self._results['extracted_images'] = copied_images
+        self._results["extracted_images"] = copied_images
     
     def _extract_tables_stage(self, method: ExtractionMethod) -> None:
         """Execute table extraction stage."""
@@ -679,7 +679,7 @@ class TableSegmentationPipeline:
         extractor = TableExtractor(strategy)
         
         # Process all images
-        image_paths = [Path(p) for p in self._results.get('extracted_images', [])]
+        image_paths = [Path(p) for p in self._results.get("extracted_images", [])]
         processed_tables = []
         
         for i, image_path in enumerate(image_paths):
@@ -704,14 +704,14 @@ class TableSegmentationPipeline:
                 
             except Exception as e:
                 error_msg = f"Failed to process {image_path.name}: {e}"
-                self._results['errors'].append(error_msg)
+                self._results["errors"].append(error_msg)
                 self._observer.on_error(ProcessingStage.TABLE_EXTRACTION, e)
                 self._observer.on_progress_update(
                     i + 1, len(image_paths),
                     f"❌ Failed to extract table from: {image_path.name}"
                 )
         
-        self._results['extracted_tables'] = processed_tables
+        self._results["extracted_tables"] = processed_tables
         
         self._observer.on_stage_completed(
             ProcessingStage.TABLE_EXTRACTION,
@@ -726,7 +726,7 @@ class TableSegmentationPipeline:
         )
         
         refiner = BorderRefiner()
-        table_paths = [Path(p) for p in self._results.get('extracted_tables', [])]
+        table_paths = [Path(p) for p in self._results.get("extracted_tables", [])]
         refined_images = []
         
         for i, table_path in enumerate(table_paths):
@@ -751,14 +751,14 @@ class TableSegmentationPipeline:
                 
             except Exception as e:
                 error_msg = f"Failed to refine {table_path.name}: {e}"
-                self._results['errors'].append(error_msg)
+                self._results["errors"].append(error_msg)
                 self._observer.on_error(ProcessingStage.BORDER_REFINEMENT, e)
                 self._observer.on_progress_update(
                     i + 1, len(table_paths),
                     f"❌ Failed to refine: {table_path.name}"
                 )
         
-        self._results['refined_images'] = refined_images
+        self._results["refined_images"] = refined_images
         
         self._observer.on_stage_completed(
             ProcessingStage.BORDER_REFINEMENT,
@@ -770,7 +770,7 @@ class TableSegmentationPipeline:
         """Extract page number from filename for sorting."""
         try:
             # Look for patterns like 'page_1.png' or 'image_1.jpg'
-            parts = filename.split('_')
+            parts = filename.split("_")
             for part in parts:
                 if part.isdigit():
                     return int(part)
@@ -787,16 +787,16 @@ class TableSegmentationPipeline:
         
         # Calculate summary statistics
         total_processed = (
-            len(self._results.get('extracted_images', [])) +
-            len(self._results.get('extracted_tables', [])) +
-            len(self._results.get('refined_images', [])) +
-            len(self._results.get('fused_images', []))
+            len(self._results.get("extracted_images", [])) +
+            len(self._results.get("extracted_tables", [])) +
+            len(self._results.get("refined_images", [])) +
+            len(self._results.get("fused_images", []))
         )
         
-        self._results['summary'] = {
-            'total_processed_files': total_processed,
-            'total_errors': len(self._results['errors']),
-            'success_rate': (total_processed / (total_processed + len(self._results['errors'])) * 100) if total_processed > 0 else 0
+        self._results["summary"] = {
+            "total_processed_files": total_processed,
+            "total_errors": len(self._results["errors"]),
+            "success_rate": (total_processed / (total_processed + len(self._results["errors"])) * 100) if total_processed > 0 else 0
         }
         
         success_msg = (
@@ -813,7 +813,7 @@ class PathValidator:
     @staticmethod
     def validate_pdf_path(path: Path) -> bool:
         """Validate PDF file path."""
-        return path.exists() and path.suffix.lower() == '.pdf'
+        return path.exists() and path.suffix.lower() == ".pdf"
     
     @staticmethod
     def validate_directory_path(path: Path) -> bool:
@@ -1100,8 +1100,8 @@ class TableProcessor:
             Custom ProcessingConfig object
         """
         config_dict = {
-            'zoom_factor': zoom_factor,
-            'binarization_threshold': binarization_threshold,
+            "zoom_factor": zoom_factor,
+            "binarization_threshold": binarization_threshold,
             **kwargs
         }
         
@@ -1118,7 +1118,7 @@ def main():
     if not logging.getLogger().handlers:
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
+            format="%(asctime)s - %(levelname)s - %(message)s",
             handlers=[logging.StreamHandler()]
         )
     
@@ -1159,10 +1159,10 @@ def main():
         logging.info(f"Total Files Processed: {results['summary']['total_processed_files']}")
         logging.info(f"Errors: {results['summary']['total_errors']}")
         
-        if results['errors']:
+        if results["errors"]:
             print("\nErrors encountered:")
             logging.info("Errors encountered:")
-            for error in results['errors']:
+            for error in results["errors"]:
                 print(f"  - {error}")
                 logging.error(f"Error: {error}")
         

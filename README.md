@@ -15,7 +15,6 @@ Extrait les pages des PDF en images, segmente et extrait les tableaux englobants
 ## 📦 Dépendances
 
 - **Python** : 3.12
-- **deskew** : 1.5
 - **NumPy** : 2.0
 - **OpenCV** : 4.12
 - **Pillow** : 11.3
